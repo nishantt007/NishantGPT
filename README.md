@@ -6,7 +6,7 @@ This Streamlit application serves as a chatbot, providing information about Hari
 
 ## Features
 
-- Provides information about Art Kreimer's educational background, professional experience, and skills
+- Provides information about Harikrishna's educational background, professional experience, and skills
 - Allows users to ask questions and receive relevant responses
 - Stores conversation history in a Cloud Firebase database for further analysis
 - Supports both CSV and PDF (resume) data sources
@@ -22,7 +22,7 @@ This Streamlit application serves as a chatbot, providing information about Hari
 1. Clone the repository:
 
 ```
-git clone https://github.com/harikrishnad1997/resume-bot.git && cd resume-bot
+git clone https://github.com/harikrishnad1997/HariGPT.git && cd HariGPT
 ```
 
 2. Install the required dependencies:
@@ -32,10 +32,9 @@ pip install -r requirements.txt
 ```
 
 3. Set up the environment variables:
-   - Create a `.env` file in the project root directory.
-   - Add the following variables to the `.env` file:
-     - `OPENAI_API_KEY=your_openai_api_key`
-     - `mongodB_pass=your_mongodb_password`
+
+   - Create a `.toml file with the OPENAI key inputted `
+   - Save your Firebase JSON key in the `.streamlit/` folder
 
 ## Usage
 
@@ -46,7 +45,7 @@ streamlit run app.py
 ```
 
 2. The application will open in your default web browser.
-3. Ask questions about Art Kreimer's background and qualifications, and the chatbot will provide relevant responses.
+3. Ask questions about Harikrishna's background and qualifications, and the chatbot will provide relevant responses.
 
 ## Configuration
 
@@ -56,7 +55,7 @@ streamlit run app.py
 
 ## Acknowledgements
 
-This project was developed using the following libraries and tools:
+This project is highly influence by the Repository created by [Art Kreimer](https://github.com/kredar) and is dependent on the following libraries and tools:
 
 - [Streamlit](https://streamlit.io/) for building the web application
 - [LangChain](https://langchain.com/) for integrating the language model and retrieval chain
