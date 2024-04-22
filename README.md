@@ -11,6 +11,14 @@ This Streamlit application serves as a chatbot, providing information about Hari
 - Stores conversation history in a Cloud Firebase database for further analysis
 - Supports both CSV and PDF (resume) data sources
 
+## Link
+
+Resume Bot Wesbite : [harikrishnad1997-resume-bot.hf.space](https://harikrishnad1997-resume-bot.hf.space/)
+
+## Demo
+
+![1713819389962](assets/demo.gif)
+
 ## Prerequisites
 
 - Python 3.9 or higher
