@@ -24,10 +24,18 @@ def is_valid_json(data):
     except json.JSONDecodeError:
         return False
 
+# Calling the Firebase secret key
+if "firebase_json_key" in os.environ:
+    firebase_json_key = os.getenv("firebase_json_key")
+else:
+    firebase_json_key = st.secrets["firebase_json_key"]
+
+firebase_credentials = json.loads(firebase_json_key)
+
 # Function to initialize connection to Firebase Firestore
 @st.cache_resource
 def init_connection():
-    cred = credentials.Certificate('.streamlit/firestone-key.json')
+    cred = credentials.Certificate(firebase_credentials)
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
