@@ -7,6 +7,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.vectorstores import FAISS
 from langchain.prompts import load_prompt
+from langchain.text_splitter import CharacterTextSplitter
 from streamlit import session_state as ss
 import firebase_admin
 from firebase_admin import credentials
@@ -24,7 +25,6 @@ def is_valid_json(data):
     except json.JSONDecodeError:
         return False
 
-# Calling the Firebase secret key
 if "firebase_json_key" in os.environ:
     firebase_json_key = os.getenv("firebase_json_key")
 else:
@@ -58,8 +58,8 @@ else:
     openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # Streamlit app title and disclaimer
-st.title("Harikrishna's resume bot")
-st.image("https://harikrishnad1997.github.io/images/about.jpg")
+st.title("HariGPT - Hari's resume bot")
+st.image("images/about.jpg", use_column_width=True)
 with st.expander("⚠️Disclaimer"):
     st.write("""This bot is a LLM trained on GPT-3.5-turbo model to answer questions about Hari's professional background and qualifications. Your responses are recorded in a database for quality assurance and improvement purposes. Please be respectful and avoid asking personal or inappropriate questions.""")
 
@@ -91,8 +91,13 @@ if os.path.exists(faiss_index):
     vectors = FAISS.load_local(faiss_index, embeddings, allow_dangerous_deserialization=True)
 else:
     # Load data from PDF and CSV sources
+    text_splitter = CharacterTextSplitter(
+    separator="\n",
+    chunk_size=400,
+    chunk_overlap=40
+    )
     pdf_loader = PyPDFLoader(pdf_source)
-    pdf_data = pdf_loader.load_and_split()
+    pdf_data = pdf_loader.load_and_split(text_splitter=text_splitter)
     csv_loader = CSVLoader(file_path=data_source, encoding="utf-8")
     csv_data = csv_loader.load()
     data = pdf_data + csv_data
@@ -103,7 +108,7 @@ else:
 
 # Initialize conversational retrieval chain
 retriever = vectors.as_retriever(search_type="similarity", search_kwargs={"k": 6, "include_metadata": True, "score_threshold": 0.6})
-chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(temperature=0.5, model_name='gpt-3.5-turbo', openai_api_key=openai_api_key), 
+chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(temperature=0.5, model_name='gpt-3.5-turbo-0125', openai_api_key=openai_api_key), 
                                               retriever=retriever, return_source_documents=True, verbose=True, chain_type="stuff",
                                               max_tokens_limit=4097, combine_docs_chain_kwargs={"prompt": prompt})
 
@@ -111,7 +116,7 @@ chain = ConversationalRetrievalChain.from_llm(llm=ChatOpenAI(temperature=0.5, mo
 def conversational_chat(query):
     with st.spinner("Thinking..."):
         result = chain({"system": 
-        "You are a Resume Bot, a comprehensive, interactive resource for exploring Harikrishna (Harry) Dev's background, skills, and expertise. Be polite and provide answers based on the provided context only. You can make up projects with the skills and projects I have if the question requests a skill set related to Machine Learning, Database management or Computer sciences.", 
+        "You are a Resume Bot, a comprehensive, interactive resource for exploring Harikrishna (Harry) Dev's background, skills, and expertise. Be polite and provide answers based on the provided context only. Only answer questions relevant to Harikrishna and his work experience. Answer question if there are ONLY regarding Harikrishna Dev. If the questions is not relevant to Harikrishna, reply that you are a Resume bot. You can make up projects with the skills and projects I have if the question requests a skill set related to Machine Learning, Database management or Computer sciences.", 
                         "question": query, 
                         "chat_history": st.session_state['history']})
     
@@ -147,24 +152,23 @@ if "uuid" not in st.session_state:
     st.session_state["uuid"] = str(uuid.uuid4())
 
 if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+    st.session_state["openai_model"] = "gpt-3.5-turbo-0125"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         welcome_message = """
-            Welcome! I'm **Resume Bot**, a virtual assistant designed to provide comprehensive insights into Harikrishna (Harry) Dev's impressive background and qualifications. I have in-depth knowledge of his academic achievements, professional experiences, technical skills, and career aspirations. 
-
-            Feel free to inquire about any aspect of Hari's profile, such as his educational journey, internships, professional projects, areas of expertise in data science and AI, or his future goals. I can elaborate on topics like:
+            Welcome! I'm **Resume Bot**, a virtual assistant designed to provide insights into Harikrishna (Harry) Dev's background and qualifications. 
+            
+            Feel free to inquire about any aspect of Hari's profile, such as his educational journey, internships, professional projects, areas of expertise in data science and AI, or his future goals.
 
                 - His Master's in Business Analytics with a focus on Data Science from UTD
-                - His hands-on experience developing AI solutions like Generative models and applying techniques like regularized linear modeling
-                - His proven track record in roles at companies like Daifuku, Flipkart, and Walmart
+                - His track record in roles at companies like Daifuku, Flipkart, and Walmart
                 - His proficiency in programming languages, ML frameworks, data visualization, and cloud platforms
                 - His passion for leveraging transformative technologies to drive innovation and positive societal impact
 
-            I'm here to provide you with a comprehensive understanding of Hari's unique qualifications and capabilities. What would you like to know first? I'm ready to answer your questions in detail.
+            What would you like to know first? I'm ready to answer your questions in detail.
             """
         message_placeholder.markdown(welcome_message)
 
